@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Reminder {
   final String id;
   final String title;
   final String description;
   final DateTime time;
   final String priority;
-  final String userId; // Add userId field
+  final String userId;
 
   Reminder({
     required this.id,
@@ -12,28 +14,23 @@ class Reminder {
     required this.description,
     required this.time,
     required this.priority,
-    required this.userId, // Initialize userId
+    required this.userId,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'time': time.toIso8601String(),
-      'priority': priority,
-      'userId': userId, // Include userId in JSON
-    };
-  }
+  Reminder.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        title = json['title'],
+        description = json['description'],
+        time = (json['time'] as Timestamp).toDate(),
+        priority = json['priority'],
+        userId = json['userId'];
 
-  static Reminder fromJson(Map<String, dynamic> json) {
-    return Reminder(
-      id: json['id'],
-      title: json['title'],
-      description: json['description'],
-      time: DateTime.parse(json['time']),
-      priority: json['priority'],
-      userId: json['userId'], // Parse userId from JSON
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'time': time,
+        'priority': priority,
+        'userId': userId,
+      };
 }

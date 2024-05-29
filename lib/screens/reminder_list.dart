@@ -6,12 +6,25 @@ import 'package:reminder/state/auth/providers/auth_state_provider.dart';
 import 'package:reminder/state/dialogs/logout_dialog.dart';
 import 'package:reminder/screens/login_screen.dart';
 
-class ReminderList extends ConsumerWidget {
+class ReminderList extends ConsumerStatefulWidget {
   const ReminderList({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final reminders = ref.watch(reminderProvider);
+  _ReminderListState createState() => _ReminderListState();
+}
+
+class _ReminderListState extends ConsumerState<ReminderList> {
+  String? _selectedPriority;
+
+  @override
+  Widget build(BuildContext context) {
+    final reminders = ref.watch(reminderProvider).where((reminder) {
+      if (_selectedPriority == null) {
+        return true;
+      } else {
+        return reminder.priority == _selectedPriority;
+      }
+    }).toList();
 
     ref.listen(authStateProvider, (previous, next) {
       if (next.userId == null) {
@@ -26,14 +39,21 @@ class ReminderList extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Reminders'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ReminderForm()),
-              );
+          DropdownButton<String>(
+            value: _selectedPriority,
+            hint: const Text("Filter by priority"),
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedPriority = newValue;
+              });
             },
+            items: <String>['All', 'High', 'Medium', 'Low']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value == 'All' ? null : value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -51,6 +71,15 @@ class ReminderList extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReminderForm()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
       body: ListView.builder(
         itemCount: reminders.length,

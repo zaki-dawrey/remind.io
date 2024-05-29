@@ -115,7 +115,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ReminderList(),
+                            builder: (context) => const ReminderList(),
                           ),
                         );
                       } else {
